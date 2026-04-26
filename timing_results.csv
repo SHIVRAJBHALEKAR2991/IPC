@@ -1,0 +1,4 @@
+Implementation,N,Steps,Total_ms,PerStep_ms,Speedup_vs_Serial,GFLOP_s,Extra
+Serial,4096,5,203.383209,40.6766,1.0,8.249,
+OpenMP,4096,5,79.207536,15.8415,2.57,21.181,16
+CUDA,4096,5,0.77824,0.1556,261.34,2155.789,NVIDIA GeForce RTX 3060 Laptop GPU

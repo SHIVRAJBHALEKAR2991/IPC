@@ -3,18 +3,18 @@
 # Builds: serial, openmp, cuda, mpi  →  bin/
 ##############################################################################
 
-# ── Directories ──────────────────────────────────────────────────────────────
+# ── Directories ────────────────────────────────────────────────────────────
 SRC     := src
 INC     := include
 BIN     := bin
 SCRIPTS := scripts
 
-# ── Compiler toolchain ────────────────────────────────────────────────────────
+# ── Compiler toolchain ─────────────────────────────────────────────────────
 CXX      := g++
 MPICXX   := mpicxx
 NVCC     := nvcc
 
-# ── Common flags ─────────────────────────────────────────────────────────────
+# ── Common flags ───────────────────────────────────────────────────────────
 # -O3           : maximum scalar optimisation
 # -march=native : tune for host CPU (auto-vectorisation, AVX etc.)
 # -std=c++17    : modern C++ for structured bindings / if-constexpr
@@ -30,48 +30,48 @@ NVCCFLAGS := -O3 -arch=sm_80 -std=c++17 -I$(INC) \
              -lineinfo                 \
              --generate-line-info
 
-# ── Simulation parameters (override on command line) ─────────────────────────
+# ── Simulation parameters (override on command line) ───────────────────────
 N       ?= 16384
 STEPS   ?= 10
 
-# ── Default target ────────────────────────────────────────────────────────────
+# ── Default target ─────────────────────────────────────────────────────────
 .PHONY: all serial openmp cuda mpi clean bench help
 
 all: serial openmp cuda mpi
 
-# ── Create bin directory ──────────────────────────────────────────────────────
+# ── Create bin directory ───────────────────────────────────────────────────
 $(BIN):
 	mkdir -p $(BIN)
 
-# ── Serial ────────────────────────────────────────────────────────────────────
+# ── Serial ─────────────────────────────────────────────────────────────────
 serial: $(BIN)/serial
 
 $(BIN)/serial: $(SRC)/serial.cpp $(INC)/common.h | $(BIN)
 	$(CXX) $(CXXFLAGS) -o $@ $<
-	@echo "  ✓  Built $@"
+	@echo "  [OK]  Built $@"
 
-# ── OpenMP ────────────────────────────────────────────────────────────────────
+# ── OpenMP ─────────────────────────────────────────────────────────────────
 openmp: $(BIN)/openmp
 
 $(BIN)/openmp: $(SRC)/openmp.cpp $(INC)/common.h | $(BIN)
 	$(CXX) $(CXXFLAGS) $(OMPFLAGS) -o $@ $<
-	@echo "  ✓  Built $@"
+	@echo "  [OK]  Built $@"
 
-# ── CUDA ──────────────────────────────────────────────────────────────────────
+# ── CUDA ───────────────────────────────────────────────────────────────────
 cuda: $(BIN)/cuda
 
 $(BIN)/cuda: $(SRC)/cuda.cu $(INC)/common.h | $(BIN)
 	$(NVCC) $(NVCCFLAGS) -o $@ $<
-	@echo "  ✓  Built $@"
+	@echo "  [OK]  Built $@"
 
-# ── MPI ───────────────────────────────────────────────────────────────────────
+# ── MPI ────────────────────────────────────────────────────────────────────
 mpi: $(BIN)/mpi
 
 $(BIN)/mpi: $(SRC)/mpi.cpp $(INC)/common.h | $(BIN)
 	$(MPICXX) $(CXXFLAGS) $(MPIFLAGS) -o $@ $<
-	@echo "  ✓  Built $@"
+	@echo "  [OK]  Built $@"
 
-# ── Quick runs (for manual testing, not timed) ───────────────────────────────
+# ── Quick runs (for manual testing, not timed) ─────────────────────────────
 run-serial: $(BIN)/serial
 	./$(BIN)/serial $(N) $(STEPS)
 
@@ -84,16 +84,16 @@ run-cuda: $(BIN)/cuda
 run-mpi: $(BIN)/mpi
 	mpirun -np $$(nproc) ./$(BIN)/mpi $(N) $(STEPS)
 
-# ── Full benchmark (calls benchmark.py) ──────────────────────────────────────
+# ── Full benchmark (calls benchmark.py) ────────────────────────────────────
 bench: all
 	python3 $(SCRIPTS)/benchmark.py --n $(N) --steps $(STEPS)
 
-# ── Cleanup ───────────────────────────────────────────────────────────────────
+# ── Cleanup ────────────────────────────────────────────────────────────────
 clean:
 	rm -rf $(BIN) timing_results.csv timing_results.png
-	@echo "  ✓  Cleaned"
+	@echo "  [OK]  Cleaned"
 
-# ── Help ──────────────────────────────────────────────────────────────────────
+# ── Help ───────────────────────────────────────────────────────────────────
 help:
 	@echo ""
 	@echo "  N-Body Gravitational Simulation — Build Targets"

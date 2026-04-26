@@ -23,7 +23,7 @@ fi
 
 section "1 / 5  System update"
 apt-get update -qq
-apt-get upgrade -y -qq
+# apt-get upgrade -y -qq
 
 section "2 / 5  Core build tools"
 apt-get install -y -qq \

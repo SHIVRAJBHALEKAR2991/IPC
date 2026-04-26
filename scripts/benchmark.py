@@ -91,7 +91,7 @@ def parse_args() -> argparse.Namespace:
 
 def _run(cmd: list[str], label: str) -> Optional[str]:
     """Run a subprocess and return its stdout, or None on failure."""
-    print(f"\n  ▶  Running: {' '.join(cmd)}")
+    print(f"\n  [RUN]  Running: {' '.join(cmd)}")
     t0 = time.perf_counter()
     try:
         result = subprocess.run(
@@ -101,20 +101,20 @@ def _run(cmd: list[str], label: str) -> Optional[str]:
             timeout=3600,   # 1-hour hard limit
         )
     except FileNotFoundError:
-        print(f"  ✗  Binary not found for {label}. "
+        print(f"  [FAIL]  Binary not found for {label}. "
               f"Did you run 'make {label.lower()}'?")
         return None
     except subprocess.TimeoutExpired:
-        print(f"  ✗  {label} timed out.")
+        print(f"  [FAIL]  {label} timed out.")
         return None
 
     wall = time.perf_counter() - t0
     if result.returncode != 0:
-        print(f"  ✗  {label} exited with code {result.returncode}")
+        print(f"  [FAIL]  {label} exited with code {result.returncode}")
         print("       stderr:", result.stderr[:500])
         return None
 
-    print(f"  ✓  {label} finished in {wall:.2f}s (wall clock)")
+    print(f"  [OK]  {label} finished in {wall:.2f}s (wall clock)")
     print(result.stdout, end="")
     return result.stdout
 
@@ -155,12 +155,12 @@ def run_openmp(n: int, steps: int) -> Optional[dict]:
     env = {**os.environ, "OMP_NUM_THREADS": nthreads}
     exe = BIN_DIR / "openmp"
     cmd = [str(exe), str(n), str(steps)]
-    print(f"\n  ▶  Running: OMP_NUM_THREADS={nthreads} {' '.join(cmd)}")
+    print(f"\n  [RUN]  Running: OMP_NUM_THREADS={nthreads} {' '.join(cmd)}")
     try:
         result = subprocess.run(cmd, capture_output=True, text=True,
                                 env=env, timeout=3600)
     except FileNotFoundError:
-        print("  ✗  bin/openmp not found. Run 'make openmp'.")
+        print("  [FAIL]  bin/openmp not found. Run 'make openmp'.")
         return None
     print(result.stdout, end="")
     return _parse_csv_line(result.stdout) if result.returncode == 0 else None
@@ -192,7 +192,7 @@ def write_csv(records: list[dict], path: str) -> None:
         writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction="ignore")
         writer.writeheader()
         writer.writerows(records)
-    print(f"\n  📄  CSV written → {path}")
+    print(f"\n  [CSV]  CSV written -> {path}")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -226,7 +226,7 @@ def enrich_records(records: list[dict]) -> list[dict]:
 
 def make_plot(records: list[dict], out_png: str) -> None:
     if not HAS_MATPLOTLIB:
-        print("  ⚠  matplotlib not installed — skipping plot.")
+        print("  [WARN]  matplotlib not installed -- skipping plot.")
         return
 
     impls  = [r["Implementation"] for r in records]
@@ -291,7 +291,7 @@ def make_plot(records: list[dict], out_png: str) -> None:
     plt.tight_layout()
     plt.savefig(out_png, dpi=150, bbox_inches="tight",
                 facecolor=fig.get_facecolor())
-    print(f"  📊  Plot saved  → {out_png}")
+    print(f"  [PLOT]  Plot saved -> {out_png}")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -327,7 +327,7 @@ def main() -> None:
         if r: results.append(r)
 
     if not results:
-        print("\n  ✗  No results collected. Check that binaries are built.")
+        print("\n  [FAIL]  No results collected. Check that binaries are built.")
         sys.exit(1)
 
     # ── Enrich + write ────────────────────────────────────────────────────
@@ -351,7 +351,7 @@ def main() -> None:
     # ── Plot ──────────────────────────────────────────────────────────────
     make_plot(results, args.out_png)
 
-    print("\n  ✅  Benchmark complete.\n")
+    print("\n  [DONE]  Benchmark complete.\n")
 
 
 if __name__ == "__main__":

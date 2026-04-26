@@ -78,7 +78,7 @@ static void compute_forces_omp(Particle* __restrict__ p, int n, float dt) {
 
     // ── Euler integration — also parallelised ────────────────────────────
     #pragma omp parallel for schedule(static) default(none) \
-        shared(p, ax, ay, az, n)
+        shared(p, ax, ay, az, n, dt)
     for (int i = 0; i < n; ++i) {
         p[i].vx += ax[i] * dt;
         p[i].vy += ay[i] * dt;
