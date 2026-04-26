@@ -5,6 +5,43 @@
 [![OpenMP](https://img.shields.io/badge/OpenMP-5.0-orange)](https://www.openmp.org/)
 [![MPI](https://img.shields.io/badge/MPI-3.1-red)](https://www.mpi-forum.org/)
 
+---
+
+## Problem Statement
+
+### What problem are we solving?
+
+Imagine you have thousands of stars or planets floating in space. Every single object pulls every other object towards itself using gravity. To simulate how they all move over time, we need to calculate the gravitational force between **every possible pair** of objects at every time step.
+
+For example, if you have **N = 16,384 particles**, that means roughly **268 million force calculations per step**. If you run 10 simulation steps, that's **2.68 billion calculations** in total. Doing this on a single CPU core takes several seconds per step — too slow for any real-world use.
+
+### Why is this hard?
+
+The core challenge is the **O(N²) complexity** — the number of calculations grows as the square of the number of particles:
+
+| Particles (N) | Force pairs per step | Work grows by |
+|---------------|----------------------|---------------|
+| 1,000 | ~1 million | — |
+| 10,000 | ~100 million | 100× |
+| 100,000 | ~10 billion | 10,000× |
+
+Doubling the number of particles makes the problem **4× harder**. This means a naive single-threaded program simply cannot keep up as the simulation grows.
+
+### How do we solve it?
+
+This project implements the same simulation in **four different ways**, each using a different technique to speed it up by splitting the work across multiple processors:
+
+| Implementation | Strategy | Typical Speedup |
+|----------------|----------|-----------------|
+| **Serial** | Baseline — one CPU core, no parallelism | 1× (reference) |
+| **OpenMP** | Splits work across all CPU cores on one machine | ~5–15× |
+| **CUDA** | Offloads work to thousands of GPU cores | ~200–800× |
+| **MPI** | Distributes work across multiple processes (or machines) | ~4–8× |
+
+The goal is to show how the same mathematical problem can be accelerated dramatically using parallel programming — and to measure exactly how much each approach helps.
+
+---
+
 A professional-grade **O(N²) brute-force N-Body gravitational simulation** implemented in four parallel programming paradigms — Serial, OpenMP, CUDA (shared-memory tiling), and MPI — designed to demonstrate and benchmark HPC acceleration strategies.
 
 ---
