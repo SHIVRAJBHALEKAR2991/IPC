@@ -175,9 +175,10 @@ def run_cuda(n: int, steps: int) -> Optional[dict]:
 def run_mpi(n: int, steps: int, ranks: Optional[int]) -> Optional[dict]:
     import multiprocessing
     if ranks is None:
-        ranks = multiprocessing.cpu_count()
+        # Cap at 8 by default; --oversubscribe lets OpenMPI exceed slot limits
+        ranks = min(multiprocessing.cpu_count(), 8)
     exe = BIN_DIR / "mpi"
-    out = _run(["mpirun", "-np", str(ranks), str(exe), str(n), str(steps)], "MPI")
+    out = _run(["mpirun", "--oversubscribe", "-np", str(ranks), str(exe), str(n), str(steps)], "MPI")
     return _parse_csv_line(out) if out else None
 
 

@@ -82,7 +82,7 @@ run-cuda: $(BIN)/cuda
 	./$(BIN)/cuda $(N) $(STEPS)
 
 run-mpi: $(BIN)/mpi
-	mpirun -np $$(nproc) ./$(BIN)/mpi $(N) $(STEPS)
+	mpirun --oversubscribe -np $$(( $$(nproc) < 8 ? $$(nproc) : 8 )) ./$(BIN)/mpi $(N) $(STEPS)
 
 # ── Full benchmark (calls benchmark.py) ────────────────────────────────────
 bench: all
